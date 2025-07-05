@@ -84,7 +84,7 @@
     <div class="container">
       <button class="btn-primary" id="cameraButton">Open Camera</button>
       <div class="video-container" id="videoContainer">
-        <video id="videoElement" autoplay></video>
+        <video id="videoElement" autoplay playsinline></video>
         <button class="btn-primary" id="stopButton">Stop Camera</button>
       </div>
     </div>
@@ -109,7 +109,7 @@
         } catch (error) {
           console.error("Error accessing camera:", error);
           alert(
-            "Unable to access camera. Please ensure you have granted camera permissions."
+            "Unable to access camera. Please ensure you have granted camera permissions.",
           );
         }
       }
