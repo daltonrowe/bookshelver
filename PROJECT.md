@@ -11,7 +11,7 @@ It then allows users to organize this state by color, lightness other properties
 When clicking the scan book button the browser attempts to use the native camera API to take a picture.
 When the picture is taken, it should store a thumbnail of the image at 500x100 pixels JPEG at 0.8 quality stored in state as a base 64 data
 When the camera preview is displayed, it should appear as a thumbnail in the bottom center of the screen
-Over the thumbnail should be a vertical rectangular outline with an aspect ratio of roughly 5:1.
+Over the thumbnail should be a vertical rectangular outline with an aspect ratio of roughly 1:5.
 Tapping or clicking on the video thumbnail will take a snapshot.
 
 ### Color extraction
@@ -42,3 +42,5 @@ When a book is selected the control panel should show the option to remove that 
 
 When the control panel is open and the user is taking a snapshot with their camera, the control panel should show two options.
 "Take photo" and "cancel"
+When in photo mode the camera preview should appear above the control panel.
+Taking a photo should not close the photo preview, allowing the user to take multiple snapshots in a row.
