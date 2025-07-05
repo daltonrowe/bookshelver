@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bookshelver</title>
+    <style>
+      :root {
+        --spacing-1: 0.25rem;
+        --spacing-2: 0.5rem;
+        --spacing-3: 0.75rem;
+        --spacing-4: 1rem;
+        --spacing-5: 1.25rem;
+        --spacing-6: 1.5rem;
+        --spacing-8: 2rem;
+
+        --color-bg: #222222;
+        --color-surface: #333333;
+        --color-text: #ffffff;
+        --color-accent: #4a9eff;
+        --color-danger: #ff4444;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .flex {
+        display: flex;
+      }
+
+      .flex-col {
+        flex-direction: column;
+      }
+
+      .flex-1 {
+        flex: 1;
+      }
+
+      .items-center {
+        align-items: center;
+      }
+
+      .justify-center {
+        justify-content: center;
+      }
+
+      .gap-2 {
+        gap: var(--spacing-2);
+      }
+
+      .gap-3 {
+        gap: var(--spacing-3);
+      }
+
+      .gap-4 {
+        gap: var(--spacing-4);
+      }
+
+      .p-4 {
+        padding: var(--spacing-4);
+      }
+
+      .p-6 {
+        padding: var(--spacing-6);
+      }
+
+      .rounded {
+        border-radius: 0.5rem;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      header {
+        background-color: var(--color-surface);
+        padding: var(--spacing-4);
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .bookshelf {
+        flex: 1;
+        padding: var(--spacing-4);
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-3);
+        align-content: flex-start;
+      }
+
+      .book {
+        width: 100px;
+        height: 20px;
+        border-radius: 3px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s;
+      }
+
+      .book:hover {
+        transform: scale(1.05);
+      }
+
+      .book.selected {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      .book-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.4;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      .control-panel {
+        position: fixed;
+        bottom: var(--spacing-4);
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: var(--color-surface);
+        padding: var(--spacing-4);
+        border-radius: var(--spacing-3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      button {
+        background-color: var(--color-accent);
+        color: var(--color-text);
+        border: none;
+        padding: var(--spacing-3) var(--spacing-5);
+        border-radius: var(--spacing-2);
+        font-size: 1rem;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+
+      button:hover {
+        opacity: 0.9;
+      }
+
+      button.danger {
+        background-color: var(--color-danger);
+      }
+
+      .camera-view {
+        position: fixed;
+        bottom: calc(var(--spacing-4) * 2 + 60px);
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50px;
+        height: 250px;
+        background-color: var(--color-surface);
+        border-radius: var(--spacing-2);
+        overflow: hidden;
+        cursor: pointer;
+      }
+
+      .camera-view video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .camera-outline {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 200px;
+        border: 2px solid var(--color-accent);
+        border-radius: 3px;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Bookshelver</h1>
+    </header>
+
+    <main class="flex flex-col flex-1">
+      <div class="bookshelf" id="bookshelf"></div>
+    </main>
+
+    <div class="camera-view hidden" id="cameraView">
+      <video id="video" autoplay playsinline></video>
+      <div class="camera-outline"></div>
+    </div>
+
+    <div class="control-panel" id="controlPanel">
+      <div id="defaultControls" class="flex gap-3">
+        <button id="scanBookBtn">Scan Book</button>
+      </div>
+      <div id="selectedControls" class="hidden flex gap-3">
+        <button id="removeBookBtn" class="danger">Remove Book</button>
+      </div>
+      <div id="cameraControls" class="hidden flex gap-3">
+        <button id="takePhotoBtn">Take Photo</button>
+        <button id="cancelCameraBtn" class="danger">Cancel</button>
+      </div>
+    </div>
+
+    <script>
+      const state = {
+        books: [],
+        selectedBookId: null,
+        cameraActive: false,
+      };
+
+      const bookshelf = document.getElementById("bookshelf");
+      const controlPanel = document.getElementById("controlPanel");
+      const defaultControls = document.getElementById("defaultControls");
+      const selectedControls = document.getElementById("selectedControls");
+      const cameraControls = document.getElementById("cameraControls");
+      const cameraView = document.getElementById("cameraView");
+      const video = document.getElementById("video");
+
+      const scanBookBtn = document.getElementById("scanBookBtn");
+      const removeBookBtn = document.getElementById("removeBookBtn");
+      const takePhotoBtn = document.getElementById("takePhotoBtn");
+      const cancelCameraBtn = document.getElementById("cancelCameraBtn");
+
+      let stream = null;
+
+      function generateId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+      }
+
+      function rgbToHsl(r, g, b) {
+        r /= 255;
+        g /= 255;
+        b /= 255;
+
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        let h,
+          s,
+          l = (max + min) / 2;
+
+        if (max === min) {
+          h = s = 0;
+        } else {
+          const d = max - min;
+          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+          switch (max) {
+            case r:
+              h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+              break;
+            case g:
+              h = ((b - r) / d + 2) / 6;
+              break;
+            case b:
+              h = ((r - g) / d + 4) / 6;
+              break;
+          }
+        }
+
+        return {
+          h: Math.round(h * 360),
+          s: Math.round(s * 100),
+          l: Math.round(l * 100),
+        };
+      }
+
+      function hslToHex(h, s, l) {
+        l /= 100;
+        const a = (s * Math.min(l, 1 - l)) / 100;
+        const f = (n) => {
+          const k = (n + h / 30) % 12;
+          const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+          return Math.round(255 * color)
+            .toString(16)
+            .padStart(2, "0");
+        };
+        return `#${f(0)}${f(8)}${f(4)}`;
+      }
+
+      async function extractColor(imageData) {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = imageData.width;
+        canvas.height = imageData.height;
+        ctx.drawImage(imageData, 0, 0);
+
+        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        const pixels = [];
+        const step = Math.floor(data.length / (20 * 4));
+
+        for (let i = 0; i < data.length; i += step * 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const hsl = rgbToHsl(r, g, b);
+          pixels.push({ r, g, b, hsl });
+        }
+
+        pixels.sort((a, b) => {
+          const aScore = a.hsl.s * (1 - Math.abs(a.hsl.l - 50) / 50);
+          const bScore = b.hsl.s * (1 - Math.abs(b.hsl.l - 50) / 50);
+          return bScore - aScore;
+        });
+
+        const best = pixels[0].hsl;
+        return {
+          hsl: best,
+          hex: hslToHex(best.h, best.s, best.l),
+        };
+      }
+
+      async function createThumbnail(video) {
+        const canvas = document.createElement("canvas");
+        canvas.width = 500;
+        canvas.height = 100;
+        const ctx = canvas.getContext("2d");
+
+        const videoAspect = video.videoWidth / video.videoHeight;
+        const canvasAspect = canvas.width / canvas.height;
+
+        let drawWidth, drawHeight, x, y;
+
+        if (videoAspect > canvasAspect) {
+          drawHeight = canvas.height;
+          drawWidth = drawHeight * videoAspect;
+          x = (canvas.width - drawWidth) / 2;
+          y = 0;
+        } else {
+          drawWidth = canvas.width;
+          drawHeight = drawWidth / videoAspect;
+          x = 0;
+          y = (canvas.height - drawHeight) / 2;
+        }
+
+        ctx.drawImage(video, x, y, drawWidth, drawHeight);
+
+        return {
+          dataUrl: canvas.toDataURL("image/jpeg", 0.8),
+          canvas: canvas,
+        };
+      }
+
+      function sortBooksByColor() {
+        state.books.sort((a, b) => {
+          const hueWeight = 0.7;
+          const lightnessWeight = 0.3;
+
+          const hueDiff = Math.abs(a.color.hsl.h - b.color.hsl.h);
+          const adjustedHueDiff = Math.min(hueDiff, 360 - hueDiff);
+
+          const score =
+            (a.color.hsl.h - b.color.hsl.h) * hueWeight +
+            (a.color.hsl.l - b.color.hsl.l) * lightnessWeight;
+
+          return score;
+        });
+      }
+
+      function renderBookshelf() {
+        bookshelf.innerHTML = "";
+
+        state.books.forEach((book) => {
+          const bookEl = document.createElement("div");
+          bookEl.className = "book";
+          bookEl.style.backgroundColor = book.color.hex;
+          bookEl.dataset.bookId = book.id;
+
+          if (book.id === state.selectedBookId) {
+            bookEl.classList.add("selected");
+          }
+
+          const img = document.createElement("img");
+          img.className = "book-image";
+          img.src = book.thumbnail;
+
+          bookEl.appendChild(img);
+          bookEl.addEventListener("click", () => selectBook(book.id));
+
+          bookshelf.appendChild(bookEl);
+        });
+      }
+
+      function selectBook(bookId) {
+        if (state.cameraActive) return;
+
+        if (state.selectedBookId === bookId) {
+          state.selectedBookId = null;
+        } else {
+          state.selectedBookId = bookId;
+        }
+
+        updateControlPanel();
+        renderBookshelf();
+      }
+
+      function updateControlPanel() {
+        defaultControls.classList.toggle(
+          "hidden",
+          state.selectedBookId !== null || state.cameraActive,
+        );
+        selectedControls.classList.toggle(
+          "hidden",
+          state.selectedBookId === null || state.cameraActive,
+        );
+        cameraControls.classList.toggle("hidden", !state.cameraActive);
+      }
+
+      async function startCamera() {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" },
+            audio: false,
+          });
+          video.srcObject = stream;
+          state.cameraActive = true;
+          cameraView.classList.remove("hidden");
+          updateControlPanel();
+        } catch (err) {
+          console.error("Error accessing camera:", err);
+          alert("Unable to access camera");
+        }
+      }
+
+      function stopCamera() {
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
+          stream = null;
+        }
+        video.srcObject = null;
+        state.cameraActive = false;
+        cameraView.classList.add("hidden");
+        updateControlPanel();
+      }
+
+      async function takePhoto() {
+        if (!state.cameraActive || !stream) return;
+
+        const { dataUrl, canvas } = await createThumbnail(video);
+        const color = await extractColor(canvas);
+
+        const book = {
+          id: generateId(),
+          thumbnail: dataUrl,
+          color: color,
+          timestamp: Date.now(),
+        };
+
+        state.books.push(book);
+        sortBooksByColor();
+        renderBookshelf();
+      }
+
+      function removeSelectedBook() {
+        if (!state.selectedBookId) return;
+
+        state.books = state.books.filter(
+          (book) => book.id !== state.selectedBookId,
+        );
+        state.selectedBookId = null;
+
+        renderBookshelf();
+        updateControlPanel();
+      }
+
+      scanBookBtn.addEventListener("click", startCamera);
+      removeBookBtn.addEventListener("click", removeSelectedBook);
+      takePhotoBtn.addEventListener("click", takePhoto);
+      cancelCameraBtn.addEventListener("click", stopCamera);
+      cameraView.addEventListener("click", takePhoto);
+
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".book") && !e.target.closest(".control-panel")) {
+          state.selectedBookId = null;
+          updateControlPanel();
+          renderBookshelf();
+        }
+      });
+
+      renderBookshelf();
+      updateControlPanel();
+    </script>
+  </body>
+</html>
