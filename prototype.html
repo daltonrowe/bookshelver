@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Camera Prototype</title>
+    <style>
+      :root {
+        --spacing-1: 0.25rem;
+        --spacing-2: 0.5rem;
+        --spacing-3: 0.75rem;
+        --spacing-4: 1rem;
+        --spacing-5: 1.25rem;
+        --spacing-6: 1.5rem;
+        --spacing-8: 2rem;
+
+        --color-bg: #222222;
+        --color-surface: #333333;
+        --color-text: #ffffff;
+        --color-primary: #4285f4;
+        --color-primary-hover: #5a95f5;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-4);
+      }
+
+      .btn-primary {
+        background: var(--color-primary);
+        color: var(--color-text);
+        border: none;
+        border-radius: 0.5rem;
+        padding: var(--spacing-3) var(--spacing-6);
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .btn-primary:hover {
+        background: var(--color-primary-hover);
+      }
+
+      .video-container {
+        display: none;
+        flex-direction: column;
+        gap: var(--spacing-4);
+        align-items: center;
+      }
+
+      .video-container.active {
+        display: flex;
+      }
+
+      video {
+        width: 100%;
+        max-width: 600px;
+        border-radius: 0.5rem;
+        background: var(--color-surface);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <button class="btn-primary" id="cameraButton">Open Camera</button>
+      <div class="video-container" id="videoContainer">
+        <video id="videoElement" autoplay></video>
+        <button class="btn-primary" id="stopButton">Stop Camera</button>
+      </div>
+    </div>
+
+    <script>
+      const cameraButton = document.getElementById("cameraButton");
+      const videoContainer = document.getElementById("videoContainer");
+      const videoElement = document.getElementById("videoElement");
+      const stopButton = document.getElementById("stopButton");
+      let stream = null;
+
+      async function startCamera() {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: "environment",
+            },
+          });
+          videoElement.srcObject = stream;
+          cameraButton.style.display = "none";
+          videoContainer.classList.add("active");
+        } catch (error) {
+          console.error("Error accessing camera:", error);
+          alert(
+            "Unable to access camera. Please ensure you have granted camera permissions."
+          );
+        }
+      }
+
+      function stopCamera() {
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
+          videoElement.srcObject = null;
+          stream = null;
+        }
+        videoContainer.classList.remove("active");
+        cameraButton.style.display = "block";
+      }
+
+      cameraButton.addEventListener("click", startCamera);
+      stopButton.addEventListener("click", stopCamera);
+    </script>
+  </body>
+</html>

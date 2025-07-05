@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Search(*)",
+      "Search(pattern:*)",
+      "Search(pattern:*, include:*)",
+      "Read(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Bash(npm run lint)"
+    ],
+    "deny": ["Bash(npm install:*)", "Bash(npm i:*)"]
+  }
+}

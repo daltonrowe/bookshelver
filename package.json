@@ -1,0 +1,18 @@
+{
+  "name": "claude-html-tool",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "prompt": "claude",
+    "lint": "prettier . --write"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@anthropic-ai/claude-code": "^1.0.35"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}
