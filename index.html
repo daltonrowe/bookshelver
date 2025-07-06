@@ -6,19 +6,19 @@
     <title>Bookshelver</title>
     <style>
       :root {
-        --spacing-1: 0.25rem;
-        --spacing-2: 0.5rem;
-        --spacing-3: 0.75rem;
-        --spacing-4: 1rem;
-        --spacing-5: 1.25rem;
-        --spacing-6: 1.5rem;
-        --spacing-8: 2rem;
-
+        --space-1: 0.25rem;
+        --space-2: 0.5rem;
+        --space-3: 0.75rem;
+        --space-4: 1rem;
+        --space-5: 1.25rem;
+        --space-6: 1.5rem;
+        --space-8: 2rem;
         --color-bg: #222222;
-        --color-surface: #333333;
+        --color-panel: #333333;
         --color-text: #ffffff;
-        --color-accent: #4a9eff;
-        --color-danger: #ff4444;
+        --color-outline: #00ff00;
+        --color-button: #444444;
+        --color-button-hover: #555555;
       }
 
       * {
@@ -28,12 +28,10 @@
       }
 
       body {
-        font-family:
-          system-ui,
-          -apple-system,
-          sans-serif;
-        background-color: var(--color-bg);
+        background: var(--color-bg);
         color: var(--color-text);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
@@ -42,87 +40,64 @@
       .flex {
         display: flex;
       }
-
       .flex-col {
         flex-direction: column;
       }
-
-      .flex-1 {
-        flex: 1;
-      }
-
       .items-center {
         align-items: center;
       }
-
       .justify-center {
         justify-content: center;
       }
-
       .gap-2 {
-        gap: var(--spacing-2);
+        gap: var(--space-2);
       }
-
-      .gap-3 {
-        gap: var(--spacing-3);
-      }
-
       .gap-4 {
-        gap: var(--spacing-4);
+        gap: var(--space-4);
       }
-
       .p-4 {
-        padding: var(--spacing-4);
+        padding: var(--space-4);
       }
-
       .p-6 {
-        padding: var(--spacing-6);
+        padding: var(--space-6);
       }
-
       .rounded {
-        border-radius: 0.5rem;
+        border-radius: 8px;
       }
-
+      .relative {
+        position: relative;
+      }
+      .absolute {
+        position: absolute;
+      }
       .hidden {
-        display: none !important;
-      }
-
-      header {
-        background-color: var(--color-surface);
-        padding: var(--spacing-4);
-        text-align: center;
-      }
-
-      h1 {
-        font-size: 1.5rem;
-        font-weight: 600;
+        display: none;
       }
 
       .bookshelf {
         flex: 1;
-        padding: var(--spacing-4);
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--spacing-3);
-        align-content: flex-start;
+        padding: var(--space-8);
+        display: grid;
+        grid-template-columns: repeat(var(--wrap-value, 10), 1fr);
+        gap: var(--space-4);
+        align-content: start;
       }
 
       .book {
-        width: 100px;
-        height: 20px;
-        border-radius: 3px;
-        cursor: pointer;
+        aspect-ratio: 1/5;
         position: relative;
+        cursor: pointer;
+        border-radius: 4px;
         overflow: hidden;
         transition: transform 0.2s;
       }
 
       .book:hover {
-        transform: scale(1.05);
+        transform: translateY(-2px);
       }
 
       .book.selected {
-        outline: 3px solid var(--color-accent);
+        outline: 3px solid var(--color-outline);
         outline-offset: 2px;
       }
 
@@ -130,106 +105,117 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        opacity: 0.4;
-        position: absolute;
-        top: 0;
-        left: 0;
+        opacity: 0.2;
+        mix-blend-mode: multiply;
       }
 
       .control-panel {
         position: fixed;
-        bottom: var(--spacing-4);
+        bottom: var(--space-4);
         left: 50%;
         transform: translateX(-50%);
-        background-color: var(--color-surface);
-        padding: var(--spacing-4);
-        border-radius: var(--spacing-3);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        background: var(--color-panel);
+        padding: var(--space-4);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
       }
 
-      button {
-        background-color: var(--color-accent);
-        color: var(--color-text);
-        border: none;
-        padding: var(--spacing-3) var(--spacing-5);
-        border-radius: var(--spacing-2);
-        font-size: 1rem;
-        cursor: pointer;
-        transition: opacity 0.2s;
-      }
-
-      button:hover {
-        opacity: 0.9;
-      }
-
-      button.danger {
-        background-color: var(--color-danger);
-      }
-
-      .camera-view {
+      .camera-preview {
         position: fixed;
-        bottom: calc(var(--spacing-4) * 2 + 60px);
+        bottom: calc(var(--space-8) + 80px);
         left: 50%;
         transform: translateX(-50%);
-        width: 50px;
-        height: 250px;
-        background-color: var(--color-surface);
-        border-radius: var(--spacing-2);
+        width: 200px;
+        height: 400px;
+        background: #000;
+        border-radius: 8px;
         overflow: hidden;
-        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
-      .camera-view video {
+      .camera-preview video {
         width: 100%;
         height: 100%;
         object-fit: cover;
       }
 
-      .camera-outline {
+      .camera-overlay {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 40px;
-        height: 200px;
-        border: 2px solid var(--color-accent);
-        border-radius: 3px;
+        width: 60px;
+        height: 300px;
+        border: 2px solid rgba(255, 255, 255, 0.8);
         pointer-events: none;
+      }
+
+      button {
+        background: var(--color-button);
+        color: var(--color-text);
+        border: none;
+        padding: var(--space-3) var(--space-6);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.2s;
+      }
+
+      button:hover {
+        background: var(--color-button-hover);
+      }
+
+      input[type="number"] {
+        background: var(--color-button);
+        color: var(--color-text);
+        border: 1px solid transparent;
+        padding: var(--space-2) var(--space-3);
+        border-radius: 4px;
+        width: 60px;
+        text-align: center;
+      }
+
+      label {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
       }
     </style>
   </head>
   <body>
-    <header>
-      <h1>Bookshelver</h1>
-    </header>
+    <div class="bookshelf" id="bookshelf"></div>
 
-    <main class="flex flex-col flex-1">
-      <div class="bookshelf" id="bookshelf"></div>
-    </main>
-
-    <div class="camera-view hidden" id="cameraView">
+    <div class="camera-preview hidden" id="cameraPreview">
       <video id="video" autoplay playsinline></video>
-      <div class="camera-outline"></div>
+      <div class="camera-overlay"></div>
     </div>
 
     <div class="control-panel" id="controlPanel">
-      <div id="defaultControls" class="flex gap-3">
+      <div class="flex gap-4 items-center" id="defaultControls">
         <button id="scanBookBtn">Scan Book</button>
+        <label>
+          Books per row:
+          <input type="number" id="wrapInput" value="10" min="1" max="20" />
+        </label>
       </div>
-      <div id="selectedControls" class="hidden flex gap-3">
-        <button id="removeBookBtn" class="danger">Remove Book</button>
+      <div class="flex gap-4 items-center hidden" id="selectedControls">
+        <button id="removeBookBtn">Remove Book</button>
+        <button id="deselectBtn">Cancel</button>
       </div>
-      <div id="cameraControls" class="hidden flex gap-3">
+      <div class="flex gap-4 items-center hidden" id="cameraControls">
         <button id="takePhotoBtn">Take Photo</button>
-        <button id="cancelCameraBtn" class="danger">Cancel</button>
+        <button id="cancelCameraBtn">Cancel</button>
       </div>
     </div>
 
     <script>
       const state = {
         books: [],
-        selectedBookId: null,
+        selectedBookIndex: null,
         cameraActive: false,
+        stream: null,
       };
 
       const bookshelf = document.getElementById("bookshelf");
@@ -237,18 +223,146 @@
       const defaultControls = document.getElementById("defaultControls");
       const selectedControls = document.getElementById("selectedControls");
       const cameraControls = document.getElementById("cameraControls");
-      const cameraView = document.getElementById("cameraView");
+      const cameraPreview = document.getElementById("cameraPreview");
       const video = document.getElementById("video");
-
       const scanBookBtn = document.getElementById("scanBookBtn");
-      const removeBookBtn = document.getElementById("removeBookBtn");
       const takePhotoBtn = document.getElementById("takePhotoBtn");
       const cancelCameraBtn = document.getElementById("cancelCameraBtn");
+      const removeBookBtn = document.getElementById("removeBookBtn");
+      const deselectBtn = document.getElementById("deselectBtn");
+      const wrapInput = document.getElementById("wrapInput");
 
-      let stream = null;
+      function updateWrapValue() {
+        const value = parseInt(wrapInput.value) || 10;
+        bookshelf.style.setProperty("--wrap-value", value);
+      }
 
-      function generateId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+      function showControls(type) {
+        defaultControls.classList.add("hidden");
+        selectedControls.classList.add("hidden");
+        cameraControls.classList.add("hidden");
+
+        switch (type) {
+          case "default":
+            defaultControls.classList.remove("hidden");
+            break;
+          case "selected":
+            selectedControls.classList.remove("hidden");
+            break;
+          case "camera":
+            cameraControls.classList.remove("hidden");
+            break;
+        }
+      }
+
+      function renderBookshelf() {
+        bookshelf.innerHTML = "";
+
+        const sortedBooks = [...state.books].sort((a, b) => {
+          const hueA = a.color.h;
+          const hueB = b.color.h;
+          return hueA - hueB;
+        });
+
+        sortedBooks.forEach((book, index) => {
+          const bookEl = document.createElement("div");
+          bookEl.className = "book";
+          bookEl.style.backgroundColor = `hsl(${book.color.h}, ${book.color.s}%, ${book.color.l}%)`;
+
+          if (state.selectedBookIndex === state.books.indexOf(book)) {
+            bookEl.classList.add("selected");
+          }
+
+          const img = document.createElement("img");
+          img.src = book.thumbnail;
+          img.className = "book-image";
+
+          bookEl.appendChild(img);
+          bookEl.addEventListener("click", () =>
+            selectBook(state.books.indexOf(book)),
+          );
+
+          bookshelf.appendChild(bookEl);
+        });
+      }
+
+      function selectBook(index) {
+        if (state.cameraActive) return;
+
+        state.selectedBookIndex = index;
+        renderBookshelf();
+        showControls("selected");
+      }
+
+      function deselectBook() {
+        state.selectedBookIndex = null;
+        renderBookshelf();
+        showControls("default");
+      }
+
+      function removeSelectedBook() {
+        if (state.selectedBookIndex !== null) {
+          state.books.splice(state.selectedBookIndex, 1);
+          deselectBook();
+        }
+      }
+
+      async function startCamera() {
+        try {
+          state.cameraActive = true;
+          showControls("camera");
+          cameraPreview.classList.remove("hidden");
+
+          const constraints = {
+            video: {
+              facingMode: "environment",
+              width: { ideal: 1920 },
+              height: { ideal: 1080 },
+            },
+          };
+
+          state.stream = await navigator.mediaDevices.getUserMedia(constraints);
+          video.srcObject = state.stream;
+        } catch (err) {
+          console.error("Error accessing camera:", err);
+          stopCamera();
+        }
+      }
+
+      function stopCamera() {
+        if (state.stream) {
+          state.stream.getTracks().forEach((track) => track.stop());
+          state.stream = null;
+        }
+        video.srcObject = null;
+        state.cameraActive = false;
+        cameraPreview.classList.add("hidden");
+        showControls(state.selectedBookIndex !== null ? "selected" : "default");
+      }
+
+      function extractMostVibrantColor(imageData, width, height) {
+        const pixels = [];
+        const step = Math.floor((width * height) / 20);
+
+        for (let i = 0; i < imageData.length; i += step * 4) {
+          const r = imageData[i];
+          const g = imageData[i + 1];
+          const b = imageData[i + 2];
+
+          const hsl = rgbToHsl(r, g, b);
+          pixels.push({ hsl, r, g, b });
+        }
+
+        pixels.sort((a, b) => {
+          if (Math.abs(a.hsl.s - b.hsl.s) > 5) {
+            return b.hsl.s - a.hsl.s;
+          }
+          const aDist = Math.abs(a.hsl.l - 70);
+          const bDist = Math.abs(b.hsl.l - 70);
+          return aDist - bDist;
+        });
+
+        return pixels[0].hsl;
       }
 
       function rgbToHsl(r, g, b) {
@@ -267,6 +381,7 @@
         } else {
           const d = max - min;
           s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
           switch (max) {
             case r:
               h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
@@ -287,220 +402,57 @@
         };
       }
 
-      function hslToHex(h, s, l) {
-        l /= 100;
-        const a = (s * Math.min(l, 1 - l)) / 100;
-        const f = (n) => {
-          const k = (n + h / 30) % 12;
-          const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-          return Math.round(255 * color)
-            .toString(16)
-            .padStart(2, "0");
-        };
-        return `#${f(0)}${f(8)}${f(4)}`;
-      }
-
-      async function extractColor(imageData) {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        canvas.width = imageData.width;
-        canvas.height = imageData.height;
-        ctx.drawImage(imageData, 0, 0);
-
-        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-        const pixels = [];
-        const step = Math.floor(data.length / (20 * 4));
-
-        for (let i = 0; i < data.length; i += step * 4) {
-          const r = data[i];
-          const g = data[i + 1];
-          const b = data[i + 2];
-          const hsl = rgbToHsl(r, g, b);
-          pixels.push({ r, g, b, hsl });
-        }
-
-        pixels.sort((a, b) => {
-          const aScore = a.hsl.s * (1 - Math.abs(a.hsl.l - 50) / 50);
-          const bScore = b.hsl.s * (1 - Math.abs(b.hsl.l - 50) / 50);
-          return bScore - aScore;
-        });
-
-        const best = pixels[0].hsl;
-        return {
-          hsl: best,
-          hex: hslToHex(best.h, best.s, best.l),
-        };
-      }
-
-      async function createThumbnail(video) {
-        const canvas = document.createElement("canvas");
-        canvas.width = 500;
-        canvas.height = 100;
-        const ctx = canvas.getContext("2d");
-
-        const videoAspect = video.videoWidth / video.videoHeight;
-        const canvasAspect = canvas.width / canvas.height;
-
-        let drawWidth, drawHeight, x, y;
-
-        if (videoAspect > canvasAspect) {
-          drawHeight = canvas.height;
-          drawWidth = drawHeight * videoAspect;
-          x = (canvas.width - drawWidth) / 2;
-          y = 0;
-        } else {
-          drawWidth = canvas.width;
-          drawHeight = drawWidth / videoAspect;
-          x = 0;
-          y = (canvas.height - drawHeight) / 2;
-        }
-
-        ctx.drawImage(video, x, y, drawWidth, drawHeight);
-
-        return {
-          dataUrl: canvas.toDataURL("image/jpeg", 0.8),
-          canvas: canvas,
-        };
-      }
-
-      function sortBooksByColor() {
-        state.books.sort((a, b) => {
-          const hueWeight = 0.7;
-          const lightnessWeight = 0.3;
-
-          const hueDiff = Math.abs(a.color.hsl.h - b.color.hsl.h);
-          const adjustedHueDiff = Math.min(hueDiff, 360 - hueDiff);
-
-          const score =
-            (a.color.hsl.h - b.color.hsl.h) * hueWeight +
-            (a.color.hsl.l - b.color.hsl.l) * lightnessWeight;
-
-          return score;
-        });
-      }
-
-      function renderBookshelf() {
-        bookshelf.innerHTML = "";
-
-        state.books.forEach((book) => {
-          const bookEl = document.createElement("div");
-          bookEl.className = "book";
-          bookEl.style.backgroundColor = book.color.hex;
-          bookEl.dataset.bookId = book.id;
-
-          if (book.id === state.selectedBookId) {
-            bookEl.classList.add("selected");
-          }
-
-          const img = document.createElement("img");
-          img.className = "book-image";
-          img.src = book.thumbnail;
-
-          bookEl.appendChild(img);
-          bookEl.addEventListener("click", () => selectBook(book.id));
-
-          bookshelf.appendChild(bookEl);
-        });
-      }
-
-      function selectBook(bookId) {
-        if (state.cameraActive) return;
-
-        if (state.selectedBookId === bookId) {
-          state.selectedBookId = null;
-        } else {
-          state.selectedBookId = bookId;
-        }
-
-        updateControlPanel();
-        renderBookshelf();
-      }
-
-      function updateControlPanel() {
-        defaultControls.classList.toggle(
-          "hidden",
-          state.selectedBookId !== null || state.cameraActive,
-        );
-        selectedControls.classList.toggle(
-          "hidden",
-          state.selectedBookId === null || state.cameraActive,
-        );
-        cameraControls.classList.toggle("hidden", !state.cameraActive);
-      }
-
-      async function startCamera() {
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" },
-            audio: false,
-          });
-          video.srcObject = stream;
-          state.cameraActive = true;
-          cameraView.classList.remove("hidden");
-          updateControlPanel();
-        } catch (err) {
-          console.error("Error accessing camera:", err);
-          alert("Unable to access camera");
-        }
-      }
-
-      function stopCamera() {
-        if (stream) {
-          stream.getTracks().forEach((track) => track.stop());
-          stream = null;
-        }
-        video.srcObject = null;
-        state.cameraActive = false;
-        cameraView.classList.add("hidden");
-        updateControlPanel();
-      }
-
       async function takePhoto() {
-        if (!state.cameraActive || !stream) return;
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext("2d");
 
-        const { dataUrl, canvas } = await createThumbnail(video);
-        const color = await extractColor(canvas);
+        ctx.drawImage(video, 0, 0);
 
-        const book = {
-          id: generateId(),
-          thumbnail: dataUrl,
-          color: color,
-          timestamp: Date.now(),
-        };
-
-        state.books.push(book);
-        sortBooksByColor();
-        renderBookshelf();
-      }
-
-      function removeSelectedBook() {
-        if (!state.selectedBookId) return;
-
-        state.books = state.books.filter(
-          (book) => book.id !== state.selectedBookId,
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const color = extractMostVibrantColor(
+          imageData.data,
+          canvas.width,
+          canvas.height,
         );
-        state.selectedBookId = null;
 
+        const thumbnailCanvas = document.createElement("canvas");
+        thumbnailCanvas.width = 100;
+        thumbnailCanvas.height = 500;
+        const thumbnailCtx = thumbnailCanvas.getContext("2d");
+
+        const sourceY = (canvas.height - canvas.width * 5) / 2;
+        const sourceHeight = canvas.width * 5;
+
+        thumbnailCtx.drawImage(
+          canvas,
+          0,
+          sourceY,
+          canvas.width,
+          sourceHeight,
+          0,
+          0,
+          100,
+          500,
+        );
+
+        const thumbnail = thumbnailCanvas.toDataURL("image/jpeg", 0.8);
+
+        state.books.push({ thumbnail, color });
         renderBookshelf();
-        updateControlPanel();
       }
 
+      video.addEventListener("click", takePhoto);
       scanBookBtn.addEventListener("click", startCamera);
-      removeBookBtn.addEventListener("click", removeSelectedBook);
       takePhotoBtn.addEventListener("click", takePhoto);
       cancelCameraBtn.addEventListener("click", stopCamera);
-      cameraView.addEventListener("click", takePhoto);
+      removeBookBtn.addEventListener("click", removeSelectedBook);
+      deselectBtn.addEventListener("click", deselectBook);
+      wrapInput.addEventListener("input", updateWrapValue);
 
-      document.addEventListener("click", (e) => {
-        if (!e.target.closest(".book") && !e.target.closest(".control-panel")) {
-          state.selectedBookId = null;
-          updateControlPanel();
-          renderBookshelf();
-        }
-      });
-
+      updateWrapValue();
       renderBookshelf();
-      updateControlPanel();
     </script>
   </body>
 </html>
